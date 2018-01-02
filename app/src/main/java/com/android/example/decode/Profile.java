@@ -119,8 +119,7 @@ public class Profile extends AppCompatActivity {
                                             @Override
                                             public void onSuccess(Void aVoid) {
                                                 Toast.makeText(Profile.this, "Profile Updated", Toast.LENGTH_SHORT).show();
-                                                startActivity(new Intent(Profile.this, MainActivity.class));
-                                                finish();
+                                                onBackPressed();
                                                 progressDialog.dismiss();
                                             }
                                         })
@@ -128,8 +127,7 @@ public class Profile extends AppCompatActivity {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 Toast.makeText(Profile.this, "Profile Update Failed" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                startActivity(new Intent(Profile.this, MainActivity.class));
-                                                finish();
+                                                onBackPressed();
                                                 progressDialog.dismiss();
                                             }
                                         });
