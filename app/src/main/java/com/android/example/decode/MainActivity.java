@@ -101,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_findFriends) {
+            startActivity(new Intent(MainActivity.this, FindFriends.class));
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

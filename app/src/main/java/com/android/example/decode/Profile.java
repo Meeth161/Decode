@@ -13,9 +13,11 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -41,16 +43,17 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Profile extends AppCompatActivity {
 
-    Button btnSave;
     FirebaseAuth mAuth;
     DatabaseReference mRef;
     DatabaseReference userRef;
     StorageReference storageReference;
 
     CircleImageView civDp;
-    EditText etName;
     Bitmap photo;
     Uri url;
+
+    TextView tvName;
+    TextView tvStatus;
 
     ProgressDialog progressDialog;
 
@@ -66,13 +69,18 @@ public class Profile extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference();
 
+        tvName = (TextView) findViewById(R.id.textView_name_profile);
+        tvStatus = (TextView) findViewById(R.id.textView_status_profile);
+
         progressDialog.show();
         userRef = mRef.child("users").child(mAuth.getCurrentUser().getUid());
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                etName.setText(dataSnapshot.getValue(User.class).getName());
-                Glide.with(Profile.this).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
+                if(dataSnapshot != null) {
+                    tvName.setText(dataSnapshot.getValue(User.class).getName());
+                    Glide.with(Profile.this).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.ic_person_outline_black_24dp)).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
+                }
                 progressDialog.dismiss();
             }
 
@@ -83,18 +91,18 @@ public class Profile extends AppCompatActivity {
         });
 
         civDp = (CircleImageView) findViewById(R.id.circleImageView_dp);
-        etName = (EditText) findViewById(R.id.editText_name);
 
         civDp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
+                        .setAspectRatio(1, 1)
                         .start(Profile.this);
             }
         });
 
-        btnSave = (Button) findViewById(R.id.button_save);
+        /*btnSave = (Button) findViewById(R.id.button_save);
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,7 +122,7 @@ public class Profile extends AppCompatActivity {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 url = taskSnapshot.getDownloadUrl();
-                                userRef.setValue(new User(etName.getText().toString(), url.toString()))
+                                userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), url.toString()))
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
@@ -144,7 +152,7 @@ public class Profile extends AppCompatActivity {
                         });
 
                     } else {
-                        userRef.setValue(new User(etName.getText().toString(), ""))
+                        userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), ""))
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -163,7 +171,7 @@ public class Profile extends AppCompatActivity {
                     }
                 }
             }
-        });
+        });*/
     }
 
     @Override
