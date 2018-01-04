@@ -42,7 +42,7 @@ public class FindFriendsAdapter extends RecyclerView.Adapter<FindFriendsAdapter.
         holder.rvUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                context.startActivity(new Intent(context, UserProfile.class).putExtra("userId", users.get(position).getName()));
+                context.startActivity(new Intent(context, UserProfile.class).putExtra("uid", users.get(position).getUid()));
             }
         });
     }
