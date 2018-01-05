@@ -52,8 +52,9 @@ public class Profile extends AppCompatActivity {
     Bitmap photo;
     Uri url;
 
-    TextView tvName;
-    TextView tvStatus;
+    EditText etName;
+    EditText etStatus;
+    Button btnSave;
 
     ProgressDialog progressDialog;
 
@@ -69,19 +70,20 @@ public class Profile extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference();
 
-        tvName = (TextView) findViewById(R.id.textView_name_profile);
-        tvStatus = (TextView) findViewById(R.id.textView_status_profile);
+        etName = (EditText) findViewById(R.id.editText_name);
+        etStatus = (EditText) findViewById(R.id.editText_status);
+        btnSave = (Button) findViewById(R.id.button_save);
 
         progressDialog.show();
         userRef = mRef.child("users").child(mAuth.getCurrentUser().getUid());
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot != null) {
+                if (dataSnapshot != null) {
                     User u = dataSnapshot.getValue(User.class);
                     if (u != null) {
-                        tvName.setText(u.getName());
-                        Glide.with(Profile.this).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.ic_person_outline_black_24dp)).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
+                        etName.setText(u.getName());
+                        Glide.with(Profile.this).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
                     }
                 }
                 progressDialog.dismiss();
@@ -105,14 +107,16 @@ public class Profile extends AppCompatActivity {
             }
         });
 
-        /*btnSave = (Button) findViewById(R.id.button_save);
+        btnSave = (Button) findViewById(R.id.button_save);
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!TextUtils.isEmpty(etName.getText())){
+
+                if (!TextUtils.isEmpty(etName.getText())) {
                     progressDialog.show();
 
                     if (civDp.getDrawable() != null) {
+                        progressDialog.show();
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         photo = ((BitmapDrawable) civDp.getDrawable()).getBitmap();
                         photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -130,7 +134,8 @@ public class Profile extends AppCompatActivity {
                                             @Override
                                             public void onSuccess(Void aVoid) {
                                                 Toast.makeText(Profile.this, "Profile Updated", Toast.LENGTH_SHORT).show();
-                                                onBackPressed();
+                                                startActivity(new Intent(Profile.this, MainActivity.class));
+                                                finish();
                                                 progressDialog.dismiss();
                                             }
                                         })
@@ -138,7 +143,6 @@ public class Profile extends AppCompatActivity {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 Toast.makeText(Profile.this, "Profile Update Failed" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                onBackPressed();
                                                 progressDialog.dismiss();
                                             }
                                         });
@@ -147,34 +151,36 @@ public class Profile extends AppCompatActivity {
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(Profile.this, "Profile Update Failed" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(Profile.this, MainActivity.class));
-                                finish();
+                                Toast.makeText(Profile.this, "Profile Update Failed", Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
                             }
                         });
 
                     } else {
+
                         userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), ""))
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
-                                        if(task.isSuccessful()) {
+                                        if (task.isSuccessful()) {
                                             Toast.makeText(Profile.this, "Profile Updated", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(Profile.this, MainActivity.class));
+                                            finish();
                                         } else {
                                             Toast.makeText(Profile.this, "Profile Update Failed", Toast.LENGTH_SHORT).show();
                                         }
-
-                                        startActivity(new Intent(Profile.this, MainActivity.class));
-                                        finish();
                                         progressDialog.dismiss();
                                     }
                                 });
+
                     }
+
+                } else {
+                    Toast.makeText(Profile.this, "Enter Valid Name", Toast.LENGTH_SHORT).show();
                 }
             }
-        });*/
+        });
     }
 
     @Override
@@ -183,11 +189,6 @@ public class Profile extends AppCompatActivity {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
                 Uri resultUri = result.getUri();
-                //try {
-                  //  photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(),resultUri);
-                //} catch (IOException e) {
-                  //  e.printStackTrace();
-                //}
                 civDp.setImageURI(resultUri);
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
