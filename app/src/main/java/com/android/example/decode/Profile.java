@@ -78,8 +78,11 @@ public class Profile extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot != null) {
-                    tvName.setText(dataSnapshot.getValue(User.class).getName());
-                    Glide.with(Profile.this).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.ic_person_outline_black_24dp)).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
+                    User u = dataSnapshot.getValue(User.class);
+                    if (u != null) {
+                        tvName.setText(u.getName());
+                        Glide.with(Profile.this).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.ic_person_outline_black_24dp)).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
+                    }
                 }
                 progressDialog.dismiss();
             }
