@@ -49,6 +49,7 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+
         progressDialog = new ProgressDialog(Login.this);
         progressDialog.setTitle("Login with Google");
         progressDialog.setMessage("Please Wait...");

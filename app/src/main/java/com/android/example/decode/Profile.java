@@ -83,7 +83,7 @@ public class Profile extends AppCompatActivity {
                     User u = dataSnapshot.getValue(User.class);
                     if (u != null) {
                         etName.setText(u.getName());
-                        Glide.with(Profile.this).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
+                        Glide.with(Profile.this).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.user)).load(dataSnapshot.getValue(User.class).getDpUrl()).into(civDp);
                     }
                 }
                 progressDialog.dismiss();

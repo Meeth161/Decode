@@ -37,7 +37,7 @@ public class FindFriendsAdapter extends RecyclerView.Adapter<FindFriendsAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         holder.tvUserName.setText(users.get(position).getName());
-        Glide.with(context).load(users.get(position).getDpUrl()).into(holder.civUserDp);
+        Glide.with(context).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.user)).load(users.get(position).getDpUrl()).into(holder.civUserDp);
 
         holder.rvUser.setOnClickListener(new View.OnClickListener() {
             @Override

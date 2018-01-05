@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,7 +74,7 @@ public class UserProfile extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User u = dataSnapshot.getValue(User.class);
                 tvName.setText(u.getName());
-                Glide.with(UserProfile.this).load(u.getDpUrl()).into(ivDp);
+                Glide.with(UserProfile.this).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.user)).load(u.getDpUrl()).into(ivDp);
                 progressDialog.dismiss();
             }
 
