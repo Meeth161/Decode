@@ -95,7 +95,20 @@ public class UserProfile extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()) {
-                                        statusCheck();
+
+                                        DatabaseReference notificationRef = mRef.child("notifications");
+                                        notificationRef.child(uid).push()
+                                                .setValue(new Notification(mAuth.getCurrentUser().getUid(), "friend_request"))
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+
+                                                        if(task.isSuccessful()) {
+                                                            statusCheck();
+                                                        }
+
+                                                    }
+                                                });
                                     }
                                 }
                             });

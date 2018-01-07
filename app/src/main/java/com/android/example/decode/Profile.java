@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -58,10 +59,14 @@ public class Profile extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
+    String deviceToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        deviceToken = FirebaseInstanceId.getInstance().getToken();
 
         progressDialog = new ProgressDialog(Profile.this);
         progressDialog.setTitle("Update Profile");
@@ -129,7 +134,7 @@ public class Profile extends AppCompatActivity {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 url = taskSnapshot.getDownloadUrl();
-                                userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), url.toString()))
+                                userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), url.toString(), deviceToken))
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
@@ -158,7 +163,7 @@ public class Profile extends AppCompatActivity {
 
                     } else {
 
-                        userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), ""))
+                        userRef.setValue(new User(mAuth.getCurrentUser().getUid(), etName.getText().toString(), "", deviceToken))
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
