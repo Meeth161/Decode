@@ -88,9 +88,8 @@ public class UserProfile extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (status.equals("send friend request")) {
-                    status = "requested";
                     String key = reqRef.push().getKey();
-                    reqRef.child(key).setValue(new Request(mAuth.getCurrentUser().getUid(), uid, status, key))
+                    reqRef.child(key).setValue(new Request(mAuth.getCurrentUser().getUid(), uid, "requested", key))
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -112,7 +111,7 @@ public class UserProfile extends AppCompatActivity {
                                     }
                                 }
                             });
-                } else {
+                } else if(status.equals("requested")){
                     AlertDialog.Builder builder = new AlertDialog.Builder(UserProfile.this)
                             .setMessage("Delete Request ?")
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -122,8 +121,7 @@ public class UserProfile extends AppCompatActivity {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if(task.isSuccessful()) {
-                                                status = "send friend request";
-                                                btnSendRequest.setText(status);
+                                                statusCheck();
                                             }
                                         }
                                     });
@@ -143,7 +141,7 @@ public class UserProfile extends AppCompatActivity {
     }
 
     private void statusCheck() {
-        Query query = reqRef.orderByChild("senderUid").equalTo(mAuth.getCurrentUser().getUid());
+        /*Query query = reqRef.orderByChild("senderUid").equalTo(mAuth.getCurrentUser().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -152,6 +150,33 @@ public class UserProfile extends AppCompatActivity {
                     if(r.getReceiverUid().equals(uid)) {
                         status = r.getStatus();
                         btnSendRequest.setText(status);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });*/
+
+        status = "send friend request";
+        btnSendRequest.setText(status);
+
+        reqRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot d : dataSnapshot.getChildren()) {
+                    r = d.getValue(Request.class);
+                    if(r.getSenderUid().equals(mAuth.getCurrentUser().getUid()) && r.getReceiverUid().equals(uid)) {
+                        status = r.getStatus();
+                        btnSendRequest.setText(status);
+                    } else if(r.getReceiverUid().equals(mAuth.getCurrentUser().getUid()) && r.getSenderUid().equals(uid)) {
+                        status = r.getStatus();
+                        if(status.equals("requested")) {
+                            status = "accept request";
+                            btnSendRequest.setText(status);
+                        }
                     }
                 }
             }
