@@ -24,6 +24,7 @@ public class FindFriends extends AppCompatActivity {
     ArrayList<User> users = new ArrayList<>();
 
     DatabaseReference mRef;
+    FirebaseAuth mAuth;
 
     ProgressDialog progressDialog;
 
@@ -32,6 +33,7 @@ public class FindFriends extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_friends);
 
+        mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference();
 
         toolbar = (Toolbar) findViewById(R.id.app_bar_findFriends);
@@ -53,7 +55,10 @@ public class FindFriends extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot s : dataSnapshot.getChildren()) {
-                    users.add(s.getValue(User.class));
+                    User u = s.getValue(User.class);
+
+                    if(!u.getUid().equals(mAuth.getCurrentUser().getUid()))
+                        users.add(u);
                 }
                 progressDialog.dismiss();
                 adapter.notifyDataSetChanged();

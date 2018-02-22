@@ -15,6 +15,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -37,14 +40,14 @@ public class UserProfile extends AppCompatActivity {
     DatabaseReference mRef;
     DatabaseReference userRef;
     DatabaseReference reqRef;
+    DatabaseReference friendRef;
 
     ProgressDialog progressDialog;
 
     FirebaseAuth mAuth;
 
-    String status = "send friend request";
+    String mStatus = "not friends";
 
-    Request r;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,16 +61,17 @@ public class UserProfile extends AppCompatActivity {
         mRef = FirebaseDatabase.getInstance().getReference();
         userRef = mRef.child("users").child(uid);
         reqRef = mRef.child("friend_requests");
+        friendRef = mRef.child("friends");
 
         ivDp = (CircleImageView) findViewById(R.id.circleImageView_userProfile);
         tvName = (TextView) findViewById(R.id.textView_name_userProfile);
         btnSendRequest = (Button) findViewById(R.id.button_sendFriendRequest);
 
-        statusCheck();
-
         progressDialog = new ProgressDialog(UserProfile.this);
         progressDialog.setMessage("Please Wait...");
         progressDialog.show();
+
+        statusCheck();
 
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -87,98 +91,131 @@ public class UserProfile extends AppCompatActivity {
         btnSendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (status.equals("send friend request")) {
-                    String key = reqRef.push().getKey();
-                    reqRef.child(key).setValue(new Request(mAuth.getCurrentUser().getUid(), uid, "requested", key))
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                if(mStatus.equals("not friends")) {
+                    reqRef.child(mAuth.getCurrentUser().getUid()).child(uid).setValue("sent")
+                            .addOnFailureListener(new OnFailureListener() {
                                 @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()) {
-
-                                        DatabaseReference notificationRef = mRef.child("notifications");
-                                        notificationRef.child(uid).push()
-                                                .setValue(new Notification(mAuth.getCurrentUser().getUid(), "friend_request"))
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-
-                                                        if(task.isSuccessful()) {
-                                                            statusCheck();
-                                                        }
-
-                                                    }
-                                                });
-                                    }
-                                }
-                            });
-                } else if(status.equals("requested")){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(UserProfile.this)
-                            .setMessage("Delete Request ?")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    reqRef.child(r.getKey()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()) {
-                                                statusCheck();
-                                            }
-                                        }
-                                    });
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(UserProfile.this, "Could not send Friend Request", Toast.LENGTH_SHORT).show();
                                 }
                             })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                                public void onSuccess(Void aVoid) {
+                                    reqRef.child(uid).child(mAuth.getCurrentUser().getUid()).setValue("received")
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
 
+                                                }
+                                            })
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    statusCheck();
+                                                }
+                                            });
                                 }
                             });
-                    AlertDialog ad = builder.create();
-                    ad.show();
+                } else if(mStatus.equals("sent")) {
+                    
+                    reqRef.child(mAuth.getCurrentUser().getUid()).child(uid).removeValue()
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    
+                                }
+                            })
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    reqRef.child(uid).child(mAuth.getCurrentUser().getUid()).removeValue()
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    
+                                                }
+                                            })
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    statusCheck();
+                                                }
+                                            });
+                                }
+                            });
+                    
+                } else if(mStatus.equals("received")) {
+
+                    friendRef.child(mAuth.getCurrentUser().getUid()).child(uid).setValue(ServerValue.TIMESTAMP)
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                }
+                            })
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    friendRef.child(uid).child(mAuth.getCurrentUser().getUid()).setValue(ServerValue.TIMESTAMP)
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+
+                                                }
+                                            })
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+
+                                                    reqRef.child(mAuth.getCurrentUser().getUid()).child(uid).removeValue()
+                                                            .addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+
+                                                                }
+                                                            })
+                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void aVoid) {
+                                                                    reqRef.child(uid).child(mAuth.getCurrentUser().getUid()).removeValue()
+                                                                            .addOnFailureListener(new OnFailureListener() {
+                                                                                @Override
+                                                                                public void onFailure(@NonNull Exception e) {
+
+                                                                                }
+                                                                            })
+                                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                @Override
+                                                                                public void onSuccess(Void aVoid) {
+                                                                                    statusCheck();
+                                                                                }
+                                                                            });
+                                                                }
+                                                            });
+
+                                                }
+                                            });
+                                }
+                            });
+
                 }
+
             }
         });
     }
 
     private void statusCheck() {
-        /*Query query = reqRef.orderByChild("senderUid").equalTo(mAuth.getCurrentUser().getUid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        friendRef.child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot d : dataSnapshot.getChildren()) {
-                    r = d.getValue(Request.class);
-                    if(r.getReceiverUid().equals(uid)) {
-                        status = r.getStatus();
-                        btnSendRequest.setText(status);
-                    }
+
+                if(dataSnapshot.hasChild(uid)) {
+                    mStatus = "friends";
+                    btnSendRequest.setText("UnFriend");
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
-
-        status = "send friend request";
-        btnSendRequest.setText(status);
-
-        reqRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot d : dataSnapshot.getChildren()) {
-                    r = d.getValue(Request.class);
-                    if(r.getSenderUid().equals(mAuth.getCurrentUser().getUid()) && r.getReceiverUid().equals(uid)) {
-                        status = r.getStatus();
-                        btnSendRequest.setText(status);
-                    } else if(r.getReceiverUid().equals(mAuth.getCurrentUser().getUid()) && r.getSenderUid().equals(uid)) {
-                        status = r.getStatus();
-                        if(status.equals("requested")) {
-                            status = "accept request";
-                            btnSendRequest.setText(status);
-                        }
-                    }
-                }
             }
 
             @Override
@@ -186,5 +223,29 @@ public class UserProfile extends AppCompatActivity {
 
             }
         });
+
+        reqRef.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.hasChild(uid)){
+                    mStatus = dataSnapshot.child(uid).getValue().toString();
+                    if(mStatus.equals("sent")) {
+                        btnSendRequest.setText("cancel friend request");
+                    } else if(mStatus.equals("received")) {
+                        btnSendRequest.setText("accept friend request");
+                    }
+                }
+
+                progressDialog.dismiss();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 }
