@@ -28,10 +28,10 @@
             android:name=".FindFriends"
             android:parentActivityName=".MainActivity" />
         <activity android:name=".UserProfile" />
-
         <activity
             android:name=".Register"
-            android:parentActivityName=".Login"/>
+            android:parentActivityName=".Login" />
+        <activity android:name=".Friends"></activity>
     </application>
 
 </manifest>
