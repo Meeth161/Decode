@@ -31,7 +31,9 @@
         <activity
             android:name=".Register"
             android:parentActivityName=".Login" />
-        <activity android:name=".Friends"></activity>
+        <activity android:name=".Friends" />
+        <activity android:name=".Chat"
+            android:windowSoftInputMode="adjustPan"></activity>
     </application>
 
 </manifest>

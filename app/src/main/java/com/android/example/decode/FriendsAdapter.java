@@ -33,11 +33,17 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
 
         holder.tvUserName.setText(list.get(position).getName());
         Glide.with(context).setDefaultRequestOptions(new RequestOptions().placeholder(R.drawable.user)).load(list.get(position).getDpUrl()).into(holder.civUserDp);
 
+        holder.rvUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, Chat.class).putExtra("uid", list.get(position).getUid()).putExtra("name", list.get(position).getName()));
+            }
+        });
     }
 
     @Override
