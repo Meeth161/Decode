@@ -33,7 +33,7 @@
             android:parentActivityName=".Login" />
         <activity android:name=".Friends" />
         <activity android:name=".Chat"
-            android:windowSoftInputMode="adjustResize"></activity>
+            android:windowSoftInputMode="adjustPan"></activity>
     </application>
 
 </manifest>

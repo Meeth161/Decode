@@ -44,12 +44,13 @@ public class Friends extends AppCompatActivity {
         mRef = FirebaseDatabase.getInstance().getReference();
         progressDialog = new ProgressDialog(Friends.this);
         progressDialog.setMessage("Loading...");
-        progressDialog.show();
 
         rvFriends = (RecyclerView) findViewById(R.id.rv_friends);
         adapter = new FriendsAdapter(Friends.this, users);
         rvFriends.setLayoutManager(new LinearLayoutManager(Friends.this));
         rvFriends.setAdapter(adapter);
+
+        progressDialog.show();
 
         DatabaseReference friendsRef = mRef.child("friends").child(mAuth.getCurrentUser().getUid());
         friendsRef.addValueEventListener(new ValueEventListener() {
@@ -77,7 +78,7 @@ public class Friends extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                progressDialog.dismiss();
             }
         });
 

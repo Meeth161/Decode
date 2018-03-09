@@ -15,10 +15,10 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         switch (position) {
             case 0:
-                return new RequestsFragment();
+                return new ChatsFragment();
 
             case 1:
-                return new ChatsFragment();
+                return new RequestsFragment();
 
             default:
                 return null;
@@ -35,10 +35,10 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         switch (position) {
 
             case 0:
-                return "Requests";
+                return "Chats";
 
             case 1:
-                return "Chats";
+                return "Requests";
 
             default:
                 return null;
