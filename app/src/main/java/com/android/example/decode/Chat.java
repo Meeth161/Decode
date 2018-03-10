@@ -89,17 +89,21 @@ public class Chat extends AppCompatActivity {
 
                 if(!TextUtils.isEmpty(etSendMessage.getText())) {
 
-                    final Message m = new Message( ServerValue.TIMESTAMP.toString(), etSendMessage.getText().toString().trim(), mAuth.getCurrentUser().getUid());
+                    final Message m = new Message(etSendMessage.getText().toString().trim(), mAuth.getCurrentUser().getUid());
 
                     final DatabaseReference messageRef = mRef.child("messages").child(mAuth.getCurrentUser().getUid()).child(uid);
-                    messageRef.push().setValue(m)
+                    String key = messageRef.push().getKey();
+                    messageRef.child(key).setValue(m);
+                    messageRef.child(key).child("timestamp").setValue(ServerValue.TIMESTAMP)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
 
-                                    DatabaseReference messageRef = mRef.child("messages").child(uid).child(mAuth.getCurrentUser().getUid());
-                                    messageRef.push().setValue(m);
                                     etSendMessage.setText("");
+                                    DatabaseReference messageRef = mRef.child("messages").child(uid).child(mAuth.getCurrentUser().getUid());
+                                    String key = messageRef.push().getKey();
+                                    messageRef.child(key).setValue(m);
+                                    messageRef.child(key).child("timestamp").setValue(ServerValue.TIMESTAMP);
                                 }
                             });
 

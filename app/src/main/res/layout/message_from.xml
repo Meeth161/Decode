@@ -6,10 +6,12 @@
 
     <TextView
         android:id="@+id/textView_message_from"
-        android:padding="8dp"
-        android:background="@android:color/white"
-        android:textColor="@color/colorPrimary"
-        android:layout_marginTop="8dp"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/message_from_bg"
+        android:layout_marginTop="4dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:textSize="18sp"

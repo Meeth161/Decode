@@ -6,20 +6,24 @@ package com.android.example.decode;
 
 public class Message {
 
-    String timestamp;
+    long timestamp;
     String message;
     String from;
+    boolean seen;
 
     public Message() {
     }
 
-    public Message(String timestamp, String message, String from) {
-        this.timestamp = timestamp;
+    public Message(String message, String from) {
         this.message = message;
         this.from = from;
     }
 
-    public String getTimestamp() {
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public long getTimestamp() {
         return timestamp;
     }
 
